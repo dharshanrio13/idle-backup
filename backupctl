@@ -1,21 +1,42 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 LOG="/tmp/backup-progress.log"
+
+notify_silent() {
+    if command -v notify-send >/dev/null 2>&1; then
+        notify-send "Smart Backup" "$1" 2>/dev/null || true
+    fi
+}
+
+service_warning() {
+    if command -v systemctl >/dev/null 2>&1; then
+        if ! systemctl --user is-active --quiet idle-backup.service; then
+            echo "Warning: idle-backup.service is not running. Start it with 'systemctl --user start idle-backup.service'."
+        fi
+    fi
+}
 
 case "$1" in
     start)
         touch /tmp/force_backup
-        notify-send "Smart Backup" "Manual backup started"
+        notify_silent "Manual backup started"
+        echo "Manual backup started"
+        service_warning
         ;;
     stop)
         rm -f /tmp/force_backup
-        notify-send "Smart Backup" "Manual backup stopped"
+        notify_silent "Manual backup stopped"
+        echo "Manual backup stopped"
+        service_warning
         ;;
     status)
         if [ -f /tmp/force_backup ]; then
             echo "FORCED MODE"
         else
             echo "AUTO MODE"
+        fi
+        if command -v systemctl >/dev/null 2>&1; then
+            systemctl --user status idle-backup.service --no-pager
         fi
         ;;
     progress)
@@ -24,7 +45,7 @@ case "$1" in
             exit 0
         fi
 
-        PROG=$(tail -n 1 "$LOG" | awk '{print $2}')
+        PROG=$(awk '{for(i=1;i<=NF;i++) if($i ~ /%/) print $i}' "$LOG" | tail -n 1)
 
         if [[ "$PROG" == *% ]]; then
             echo "Backup Progress: $PROG"

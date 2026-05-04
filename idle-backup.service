@@ -2,8 +2,14 @@
 Description=Idle Backup Service
 
 [Service]
-ExecStart=/usr/local/bin/idle-backup.sh
+WorkingDirectory=%h
+Environment=XAUTHORITY=%h/.Xauthority
+PassEnvironment=DISPLAY DBUS_SESSION_BUS_ADDRESS
+ExecStart=%h/.local/bin/idle-backup.sh
 Restart=always
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
 
 [Install]
 WantedBy=default.target

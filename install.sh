@@ -1,52 +1,66 @@
-#!/bin/bash
+#!/usr/bin/env bash
+set -e
 
 SERVICE_NAME="idle-backup.service"
 SCRIPT_NAME="idle-backup.sh"
-
-BIN_PATH="/usr/local/bin"
+BIN_PATH="$HOME/.local/bin"
 SERVICE_PATH="$HOME/.config/systemd/user"
 
 install_app() {
+    if [ "$(id -u)" -eq 0 ]; then
+        echo "Please run install.sh as your normal user, not as root."
+        exit 1
+    fi
+
     echo "🚀 Installing Idle Backup..."
 
-    sudo cp $SCRIPT_NAME $BIN_PATH/
-    sudo cp backupctl $BIN_PATH/
+    mkdir -p "$BIN_PATH"
+    mkdir -p "$SERVICE_PATH"
 
-    sudo chmod +x $BIN_PATH/$SCRIPT_NAME
-    sudo chmod +x $BIN_PATH/backupctl
+    cp "$SCRIPT_NAME" "$BIN_PATH/"
+    cp backupctl "$BIN_PATH/"
 
-    mkdir -p $SERVICE_PATH
-    cp $SERVICE_NAME $SERVICE_PATH/
+    chmod +x "$BIN_PATH/$SCRIPT_NAME"
+    chmod +x "$BIN_PATH/backupctl"
 
-    systemctl --user daemon-reload
-    systemctl --user enable $SERVICE_NAME
-    systemctl --user start $SERVICE_NAME
+    cp "$SERVICE_NAME" "$SERVICE_PATH/"
 
-    loginctl enable-linger $USER
+    if command -v systemctl >/dev/null 2>&1; then
+        systemctl --user daemon-reload
+        systemctl --user enable "$SERVICE_NAME"
+        systemctl --user start "$SERVICE_NAME"
+    else
+        echo "Warning: systemctl is not available. Install the service manually or run $BIN_PATH/$SCRIPT_NAME directly."
+    fi
 
-    echo "✅ Installed successfully!"
+    if command -v loginctl >/dev/null 2>&1; then
+        loginctl enable-linger "$USER" >/dev/null 2>&1 || true
+    fi
+
+    echo "✅ Installed successfully to $BIN_PATH"
+    echo "If ~/.local/bin is not in your PATH, add it to ~/.profile or ~/.bashrc."
 }
 
 uninstall_app() {
     echo "🧹 Removing Idle Backup..."
 
-    systemctl --user stop $SERVICE_NAME 2>/dev/null
-    systemctl --user disable $SERVICE_NAME 2>/dev/null
+    if command -v systemctl >/dev/null 2>&1; then
+        systemctl --user stop "$SERVICE_NAME" 2>/dev/null || true
+        systemctl --user disable "$SERVICE_NAME" 2>/dev/null || true
+    fi
 
-    rm -f $SERVICE_PATH/$SERVICE_NAME
-
-    sudo rm -f $BIN_PATH/$SCRIPT_NAME
-    sudo rm -f $BIN_PATH/backupctl
-
-    systemctl --user daemon-reload
-
+    rm -f "$SERVICE_PATH/$SERVICE_NAME"
+    rm -f "$BIN_PATH/$SCRIPT_NAME"
+    rm -f "$BIN_PATH/backupctl"
     rm -f /tmp/force_backup
     rm -f /tmp/backup-progress.log
-    rm -f $HOME/idle-backup.log
+    rm -f "$HOME/idle-backup.log"
 
-    read -p "Delete backup data also? (y/n): " choice
-    if [ "$choice" == "y" ]; then
-        rm -rf $HOME/backup/home
+    if [ -d "/mnt/backup/home" ]; then
+        read -p "Delete default backup destination /mnt/backup/home also? (y/n): " choice
+        if [ "$choice" == "y" ]; then
+            rm -rf "/mnt/backup/home"
+        fi
     fi
 
     echo "🗑️ Idle Backup removed successfully!"
