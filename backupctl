@@ -1,13 +1,15 @@
 #!/bin/bash
 
+LOG="/tmp/backup-progress.log"
+
 case "$1" in
     start)
         touch /tmp/force_backup
-        notify-send "Idle Backup" "Manual backup started"
+        notify-send "Smart Backup" "Manual backup started"
         ;;
     stop)
         rm -f /tmp/force_backup
-        notify-send "Idle Backup" "Manual backup stopped"
+        notify-send "Smart Backup" "Manual backup stopped"
         ;;
     status)
         if [ -f /tmp/force_backup ]; then
@@ -16,7 +18,21 @@ case "$1" in
             echo "AUTO MODE"
         fi
         ;;
+    progress)
+        if [ ! -f "$LOG" ]; then
+            echo "No backup started yet"
+            exit 0
+        fi
+
+        PROG=$(tail -n 1 "$LOG" | awk '{print $2}')
+
+        if [[ "$PROG" == *% ]]; then
+            echo "Backup Progress: $PROG"
+        else
+            echo "Calculating..."
+        fi
+        ;;
     *)
-        echo "Usage: backupctl {start|stop|status}"
+        echo "Usage: backupctl {start|stop|status|progress}"
         ;;
 esac

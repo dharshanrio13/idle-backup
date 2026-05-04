@@ -26,9 +26,10 @@ Automatic smart backup system for Linux.
 
 ## Usage 
 
-- backupctl start  -> start force backup (Active mode)
-- backupctl stop   -> stop force back up 
-- backupctl status -> see the status
+- backupctl start    -> start force backup (Active mode)
+- backupctl stop     -> stop force back up 
+- backupctl status   -> see the status
+- backupctl progress -> see the progress of backup
 - automatically detects idle and runs in background
 
 ## Install

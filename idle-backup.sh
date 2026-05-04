@@ -36,7 +36,7 @@ log "System started"
 start_rsync() {
     notify "Backup started"
     log "Backup started"
-    rsync -a --delete --partial --inplace "$SOURCE" "$DEST" &
+    rsync -a --delete --partial --inplace --info=progress2 "$SOURCE" "$DEST" > /tmp/backup-progress.log 2>&1 & 
     RSYNC_PID=$!
 }
 
