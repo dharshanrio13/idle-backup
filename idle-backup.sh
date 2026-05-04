@@ -2,7 +2,7 @@
 
 SOURCE="/home/"
 DEST="/mnt/backup/home"
-IDLE_LIMIT=10000 # 10 seconds in milliseconds
+IDLE_LIMIT=120000 # 2 minutes in milliseconds
 FORCE_HOUR=21
 
 STATE_FILE="/tmp/smart_backup_state"
