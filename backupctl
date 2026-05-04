@@ -1,0 +1,22 @@
+#!/bin/bash
+
+case "$1" in
+    start)
+        touch /tmp/force_backup
+        notify-send "Idle Backup" "Manual backup started"
+        ;;
+    stop)
+        rm -f /tmp/force_backup
+        notify-send "Idle Backup" "Manual backup stopped"
+        ;;
+    status)
+        if [ -f /tmp/force_backup ]; then
+            echo "FORCED MODE"
+        else
+            echo "AUTO MODE"
+        fi
+        ;;
+    *)
+        echo "Usage: backupctl {start|stop|status}"
+        ;;
+esac

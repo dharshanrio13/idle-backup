@@ -1,0 +1,10 @@
+[Unit]
+Description=Idle Backup Service
+
+[Service]
+ExecStart=/usr/local/bin/idle-backup.sh
+Restart=always
+
+[Install]
+WantedBy=default.target
+
