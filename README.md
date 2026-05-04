@@ -23,13 +23,6 @@ Automatic smart backup system for Linux.
 - If any adjustment needed in destination just go to /usr/local/bin 
 - Then find the idle-backup.sh file and modify the destination
 
-## Install
-
-```bash
-git clone https://github.com/dharshanrio13/idle-backup.git
-cd idle-backup
-bash install.sh```
-
 
 ## Usage 
 
@@ -37,3 +30,11 @@ bash install.sh```
 - backupctl stop   -> stop force back up 
 - backupctl status -> see the status
 - automatically detects idle and runs in background
+
+## Install
+
+```bash
+git clone https://github.com/dharshanrio13/idle-backup.git
+cd idle-backup
+bash install.sh
+
